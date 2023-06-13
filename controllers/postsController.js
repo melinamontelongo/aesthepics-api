@@ -92,10 +92,17 @@ exports.comment = async (req, res) => {
 exports.deleteComment = async (req, res) => {
     const commentId = req.params.commentId
     const { postId } = req.body;
-    console.log(commentId, postId)
     const post = await Posts.findById(postId);
-    if (!post) return res.status(401).json({ message: "Post not found!" });
+    if (!post) return res.status(404).json({ message: "Post not found!" });
     post.comments = post.comments.filter(comment => comment.commentId.toString() !== commentId);
     await post.save();
     res.json({ message: "Comment deleted." });
+};
+
+exports.deletePost = async(req, res) => {
+    const postId = req.params.postId;
+    const deleted = await Posts.findByIdAndDelete(postId);
+    console.log(deleted);
+    if(!deleted) return res.status(404).json({message: "There was an error trying to delete the post."});
+    res.json({message: "Post deleted successfully."});
 }
