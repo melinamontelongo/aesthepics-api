@@ -40,7 +40,7 @@ exports.create = async (req, res) => {
     const description = req.body.description
     const picture = req.file.path;
     const user = await Users.findById(userID).select("_id ownPosts");
-    if (!user) res.status(404).json({ message: "User not found" });
+    if (!user) res.status(404).json({ message: "User not found." });
     const newPost = new Posts({
         picture,
         description,
@@ -57,8 +57,8 @@ exports.like = async (req, res) => {
     const userId = req.body.userId;
     const post = await Posts.findById(postId);
     const user = await Users.findById(userId).select("_id likedPosts");
-    if (!post) return res.status(404).json({ message: "Post not found" });
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!post) return res.status(404).json({ message: "Post not found." });
+    if (!user) return res.status(404).json({ message: "User not found." });
     const findLikedPost = user.likedPosts.filter((post) => post.toString() === postId);
     //  If post was already liked, dislike it
     if (findLikedPost.length > 0) {
@@ -67,7 +67,7 @@ exports.like = async (req, res) => {
         post.likeCount -= 1;
         post.whoLiked = post.whoLiked.filter((u) => u.toString() !== userId);
         await post.save();
-        return res.json({ message: "Post disliked", likeCount: post.likeCount });
+        return res.json({ message: "Post disliked.", likeCount: post.likeCount });
     } else {
         user.likedPosts.push(post._id);
         await user.save();

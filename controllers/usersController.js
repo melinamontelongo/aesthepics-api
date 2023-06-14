@@ -6,14 +6,14 @@ require("dotenv").config();
 exports.getUser = async (req, res) => {
     const userID = req.params.userID;
     const user = await Users.findById(userID).select("_id username profilePic firstName lastName bio friends likedPosts");
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user) return res.status(404).json({ message: "User not found." });
     return res.status(200).json({ user });
 }
 
 exports.register = async (req, res) => {
     const { username, password } = req.body;
     const user = await Users.findOne({ username: { $regex: username, $options: "i" } });
-    if (user) return res.status(409).json({ message: "User already exists" });
+    if (user) return res.status(409).json({ message: "User already exists." });
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new Users({ username, password: hashedPassword })
     await newUser.save();
@@ -67,20 +67,20 @@ exports.unfriend = async (req, res) => {
     const friendID = req.body.friendID;
     const user = await Users.findById(userID);
     //  If requested friend to remove is not on friends list
-    if (user.friends.filter(f => f.toString() !== friendID).length > 0) return res.json({ message: "That user is not on your friends list" });
+    if (user.friends.filter(f => f.toString() !== friendID).length > 0) return res.json({ message: "That user is not on your friends list." });
     user.friends = user.friends.filter(f => f.toString() !== friendID);
     await user.save();
-    res.json({ message: "Friend deleted" });
+    res.json({ message: "Friend deleted." });
 };
 
 exports.verifyToken = (req, res, next) => {
     const token = req.headers.authorization;
     if (token) {
         jwt.verify(token, process.env.JWT_SECRET, (err) => {
-            if (err) return res.status(403).json({message: "User not authorized."});
+            if (err) return res.status(403).json({message: "Not authorized. Try again later."});
             next();
         });
     } else {
-        return res.status(401).json({message: "User not authenticated."});
+        return res.status(401).json({message: "Not authenticated. Please sign in or register."});
     }
 };
