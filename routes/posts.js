@@ -31,5 +31,7 @@ router.put("/comment/:postId", UsersController.verifyToken, PostsController.comm
 //  Delete a comment from a post
 router.put("/comment/delete/:commentId", UsersController.verifyToken, PostsController.deleteComment);
 
+//  Delete a post
 router.delete("/:postId/:publicID", UsersController.verifyToken, cloudinaryController.deleteDbPic, PostsController.deletePost);
+
 module.exports = router;

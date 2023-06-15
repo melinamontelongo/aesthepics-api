@@ -1,7 +1,19 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const ObjectID = require('mongodb').ObjectId;
 const Users = require("../models/Users");
 require("dotenv").config();
+
+exports.getRandomUsers = async (req, res) => {
+    const { userID } = req.body;
+    const objectUserID = new ObjectID(userID);
+    const loggedUser = await Users.findById(objectUserID);
+    const allUsers = await Users.aggregate([{
+        $match: {"_id": {$ne: objectUserID, $nin: loggedUser.friends}}
+    }]).sample(5);
+    if(!allUsers) return res.status(404).json({message: "Users not found."});
+    res.json({ users: allUsers });
+};
 
 exports.getUser = async (req, res) => {
     const userID = req.params.userID;
@@ -17,7 +29,7 @@ exports.register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new Users({ username, password: hashedPassword })
     await newUser.save();
-    res.json({ message: "User registered successfully!" });
+    res.json({ message: "User registered successfully! You can now sign in." });
 };
 
 exports.login = async (req, res) => {
@@ -25,7 +37,7 @@ exports.login = async (req, res) => {
     const user = await Users.findOne({ username });
     if (!user) return res.status(403).json({ message: "That user doesn't exist" });
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) return res.status(403).json({ message: "Username or password incorrect" });
+    if (!isPasswordValid) return res.status(403).json({ message: "Username or password incorrect." });
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
     res.json({ token, userID: user._id, username, message: "User logged in successfully!" })
 };
@@ -33,7 +45,7 @@ exports.login = async (req, res) => {
 exports.update = async (req, res) => {
     const { userID, firstName, lastName, bio } = req.body;
     const updatedUser = await Users.findByIdAndUpdate(userID, { firstName, lastName, bio }, { new: true });
-    if (!updatedUser) return res.status(404).json({ message: "User could not be updated" });
+    if (!updatedUser) return res.status(404).json({ message: "User could not be updated." });
     res.json({ message: "User updated successfully!" });
 };
 
@@ -41,14 +53,14 @@ exports.uploadPic = async (req, res) => {
     const userID = req.params.userID;
     const picPath = req.file.path;
     const uploadPic = await Users.findByIdAndUpdate(userID, { profilePic: picPath }, { new: true });
-    if (!uploadPic) return res.status(400).json({ message: "Profile picture could not be uploaded" });
+    if (!uploadPic) return res.status(400).json({ message: "Profile picture could not be uploaded." });
     res.json({ message: "Profile picture uploaded successfully!" });
 };
 
 exports.deletePic = async (req, res) => {
     const userID = req.params.userID;
     const deletePic = await Users.findByIdAndUpdate(userID, { profilePic: "" }, { new: true });
-    if (!deletePic) return res.status(400).json({ message: "Profile picture could not be deleted" });
+    if (!deletePic) return res.status(400).json({ message: "Profile picture could not be deleted." });
     res.json({ message: "Profile picture deleted successfully!" });
 }
 
@@ -77,10 +89,10 @@ exports.verifyToken = (req, res, next) => {
     const token = req.headers.authorization;
     if (token) {
         jwt.verify(token, process.env.JWT_SECRET, (err) => {
-            if (err) return res.status(403).json({message: "Not authorized. Try again later."});
+            if (err) return res.status(403).json({ message: "Not authorized. Try again later." });
             next();
         });
     } else {
-        return res.status(401).json({message: "Not authenticated. Please sign in or register."});
+        return res.status(401).json({ message: "Not authenticated. Please sign in or register." });
     }
 };

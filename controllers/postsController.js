@@ -102,7 +102,9 @@ exports.deleteComment = async (req, res) => {
 exports.deletePost = async(req, res) => {
     const postId = req.params.postId;
     const deleted = await Posts.findByIdAndDelete(postId);
-    console.log(deleted);
     if(!deleted) return res.status(404).json({message: "There was an error trying to delete the post."});
+    const deleteFromUser = await Users.findById(deleted.userOwner);
+    deleteFromUser.ownPosts = deleteFromUser.ownPosts.filter(post =>  post.toString() !== postId);
+    await deleteFromUser.save();
     res.json({message: "Post deleted successfully."});
-}
+};

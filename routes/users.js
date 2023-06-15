@@ -4,6 +4,9 @@ const router = express.Router();
 const UsersController = require("../controllers/usersController");
 const cloudinaryController = require("../config/cloudinary");
 
+//  Get set of random users
+router.post("/", UsersController.getRandomUsers);
+
 //  Get user based on ID
 router.get("/:userID", UsersController.getUser);
 
