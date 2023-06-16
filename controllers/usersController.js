@@ -79,7 +79,7 @@ exports.unfriend = async (req, res) => {
     const friendID = req.body.friendID;
     const user = await Users.findById(userID);
     //  If requested friend to remove is not on friends list
-    if (user.friends.filter(f => f.toString() !== friendID).length > 0) return res.json({ message: "That user is not on your friends list." });
+    if (!user.friends.filter(f => f.toString() === friendID).length > 0) return res.json({ message: "That user is not on your friends list." });
     user.friends = user.friends.filter(f => f.toString() !== friendID);
     await user.save();
     res.json({ message: "Friend deleted." });
