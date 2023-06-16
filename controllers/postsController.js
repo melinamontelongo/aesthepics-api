@@ -6,7 +6,7 @@ exports.all = async (req, res) => {
     const page = parseInt(req.query.page || "0");
     const pageSize = 2;
     const totalPosts = await Posts.countDocuments({});
-    const posts = await Posts.find({}).limit(pageSize).skip(pageSize * page);
+    const posts = await Posts.find({}).limit(pageSize).skip(pageSize * page).sort({_id: -1});
     if (!posts) res.status(404).json({ message: "Posts were not found!" })
     res.json({
         total: Math.ceil(totalPosts / pageSize),
