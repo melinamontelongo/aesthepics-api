@@ -10,7 +10,7 @@ exports.getRandomUsers = async (req, res) => {
     const loggedUser = await Users.findById(objectUserID);
     const allUsers = await Users.aggregate([{
         $match: {"_id": {$ne: objectUserID, $nin: loggedUser.friends}}
-    }]).sample(5);
+    }]).sample(5).project("_id username profilePic bio");
     if(!allUsers) return res.status(404).json({message: "Users not found."});
     res.json({ users: allUsers });
 };
